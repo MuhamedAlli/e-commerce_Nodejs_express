@@ -13,14 +13,8 @@ if (!sequelize) {
   );
 }
 
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("Database Connected...");
-  })
-  .catch((err) => {
-    console.error("Database connection failed:", err);
-    process.exit(1); // Exit the process for critical failures
-  });
+sequelize.authenticate().then(() => {
+  console.log("Database Connected...");
+});
 
 module.exports = sequelize;
