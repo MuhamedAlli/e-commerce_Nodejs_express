@@ -4,7 +4,9 @@ const sequelize = require("../config/database");
 const { hashText } = require("../utils/bcrypt");
 class User extends Model {
   static associate(models) {
-    //TODO define association here
+    User.hasMany(models.RefreshToken, {
+      as: "refreshTokens",
+    });
   }
 }
 User.init(
@@ -47,6 +49,7 @@ User.init(
   {
     sequelize,
     modelName: "User",
+    tableName: "users",
   }
 );
 module.exports = { User };
