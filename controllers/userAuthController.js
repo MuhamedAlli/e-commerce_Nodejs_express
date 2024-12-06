@@ -19,6 +19,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({
     where: { email },
     include: [{ model: RefreshToken, as: "refreshTokens" }],
+    attributes: { include: ["id", "name", "email", "password"] },
   });
 
   if (!user || !(await correctPassword(password, user.password))) {
@@ -36,13 +37,9 @@ exports.login = catchAsync(async (req, res, next) => {
     refreshToken = refreshTokenEntity.token;
     refreshTokenExpiresIn = refreshTokenEntity.expiresAt;
   } else {
-    refreshToken = generateRefreshToken();
-    refreshTokenExpiresIn = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    await RefreshToken.create({
-      token: refreshToken,
-      expiresAt: refreshTokenExpiresIn,
-      userId: user.id,
-    });
+    const newRefreshTokenEntity = await generateRefreshToken(user.id);
+    refreshToken = newRefreshTokenEntity.token;
+    refreshTokenExpiresIn = newRefreshTokenEntity.expiresAt;
   }
 
   if (refreshToken) {
@@ -68,19 +65,106 @@ exports.signupUser = catchAsync(async (req, res, next) => {
 
   const newUser = await User.create(req.body);
   const token = generateAccessToken(newUser.id);
-  const refreshToken = generateRefreshToken();
-  const refreshTokenExpiresIn = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  await RefreshToken.create({
-    token: refreshToken,
-    expiresAt: refreshTokenExpiresIn,
-    userId: newUser.id,
-  });
+  const refreshTokenEntity = await generateRefreshToken(newUser.id);
 
-  setRefreshToken(res, refreshToken, refreshTokenExpiresIn);
-
+  setRefreshToken(res, refreshTokenEntity.token, refreshTokenEntity.expiresAt);
+  const { password, ...data } = newUser.toJSON();
   res.status(201).json({
     status: "success",
     token,
-    data: newUser,
+    data,
+    refreshTokenExpiresIn: refreshTokenEntity.expiresAt,
+  });
+});
+
+exports.userRefreshToken = catchAsync(async (req, res, next) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return next(new AppError("Please provide refresh token", 400));
+  }
+
+  const user = await User.findOne({
+    where: {},
+    include: {
+      model: RefreshToken,
+      as: "refreshTokens",
+      where: {
+        token: refreshToken,
+      },
+      required: true,
+    },
+  });
+
+  console.log(user);
+
+  if (!user) {
+    return next(new AppError("Invalid token!", 404));
+  }
+
+  const refreshTokenEntity = user.refreshTokens.find(
+    (token) => token.token === refreshToken
+  );
+
+  if (!refreshTokenEntity || !refreshTokenEntity.isActive) {
+    return next(new AppError("Inactive token!", 400));
+  }
+  await refreshTokenEntity.update({
+    revokedAt: new Date(),
+  });
+
+  const newRefreshTokenEntity = await generateRefreshToken(user.id);
+  const token = generateAccessToken(user.id);
+
+  setRefreshToken(
+    res,
+    newRefreshTokenEntity.token,
+    newRefreshTokenEntity.expiresAt
+  );
+
+  res.status(200).json({
+    status: "success",
+    token,
+    refreshTokenExpiresIn: newRefreshTokenEntity.expiresAt,
+  });
+});
+
+exports.userRevokeToken = catchAsync(async (req, res, next) => {
+  const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!refreshToken) {
+    return next(new AppError("Token is required!", 400));
+  }
+
+  const user = await User.findOne({
+    // where: {},
+    include: {
+      model: RefreshToken,
+      as: "refreshTokens",
+      where: {
+        token: refreshToken,
+      },
+      required: true,
+    },
+  });
+
+  if (!user) {
+    return next(new AppError("Invalid token!", 404));
+  }
+
+  const refreshTokenEntity = user.refreshTokens.find(
+    (token) => token.token === refreshToken
+  );
+
+  if (!refreshTokenEntity || !refreshTokenEntity.isActive) {
+    return next(new AppError("Inactive token!", 400));
+  }
+
+  await refreshTokenEntity.update({
+    revokedAt: new Date(),
+  });
+
+  res.status(200).json({
+    status: "success",
   });
 });

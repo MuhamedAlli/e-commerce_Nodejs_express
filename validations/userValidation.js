@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { User } = require("../models/userModel");
+const { User } = require("../models");
 const { validateUniqueField } = require("./validateUniqueField");
 
 const userSignupValidate = Joi.object({

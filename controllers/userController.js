@@ -23,7 +23,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 
 exports.getUser = catchAsync(async (req, res, next) => {
   let user = await User.findByPk(req.params.id, {
-    attributes: { exclude: ["password"] },
+    // attributes: { exclude: ["password"] },
   });
   if (!user) {
     return next(
