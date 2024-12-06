@@ -1,4 +1,4 @@
-const { User } = require("../models/userModel");
+const { User } = require("../models");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 const { userUpdateValidate } = require("../validations/userValidation");

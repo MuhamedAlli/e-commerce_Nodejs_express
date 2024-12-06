@@ -11,7 +11,7 @@ exports.generateAccessToken = (id) => {
 };
 
 exports.generateRefreshToken = () => {
-  return crypto.randomBytes(40).toString("hex");
+  return crypto.randomBytes(32).toString("hex");
 };
 
 exports.correctPassword = async (candidatePassword, userHashedPassword) => {

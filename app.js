@@ -3,8 +3,9 @@ const morgan = require("morgan");
 const globalErrorHandler = require("./middlewares/globalErrorHandler");
 const userRouter = require("./routes/userRoute");
 const AppError = require("./utils/appError");
-
+const { sequelize } = require("./models");
 const app = express();
+const cookieParser = require("cookie-parser");
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! Shitting down...");
@@ -16,6 +17,7 @@ if (process.env.NODE_ENV === "development") {
 }
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
