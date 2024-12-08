@@ -3,6 +3,8 @@ const morgan = require("morgan");
 const globalErrorHandler = require("./middlewares/globalErrorHandler");
 const userRouter = require("./routes/userRoute");
 const adminRouter = require("./routes/adminRoute");
+const roleRouter = require("./routes/roleRoute");
+const permissionRouter = require("./routes/PermissionRoute");
 const AppError = require("./utils/appError");
 const { sequelize } = require("./models");
 const app = express();
@@ -24,6 +26,8 @@ app.use(cookieParser());
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins", adminRouter);
+app.use("/api/v1/roles", roleRouter);
+app.use("/api/v1/permissions", permissionRouter);
 
 //handle not founded routes middleware
 app.all("*", (req, res, next) => {

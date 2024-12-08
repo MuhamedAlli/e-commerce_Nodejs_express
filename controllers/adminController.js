@@ -1,12 +1,7 @@
 const { adminCreateValidate } = require("../validations/adminValidation");
+const { adminUpdateValidate } = require("../validations/adminValidation");
 const { Admin } = require("../models");
-const { RefreshToken } = require("../models");
 const catchAsync = require("../utils/catchAsync");
-const {
-  generateAccessToken,
-  generateRefreshToken,
-} = require("../utils/tokenUtils");
-const { correctPassword } = require("../utils/tokenUtils");
 const AppError = require("../utils/appError");
 
 exports.createAdmin = catchAsync(async (req, res, next) => {
@@ -23,7 +18,7 @@ exports.createAdmin = catchAsync(async (req, res, next) => {
 });
 
 exports.updateAdmin = catchAsync(async (req, res, next) => {
-  await adminCreateValidate.validateAsync(req.body, {
+  await adminUpdateValidate.validateAsync(req.body, {
     abortEarly: false,
   });
 
