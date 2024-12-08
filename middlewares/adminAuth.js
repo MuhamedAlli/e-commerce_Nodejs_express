@@ -2,9 +2,11 @@ const AppError = require("../utils/appError");
 const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
-const { User } = require("../models");
+const { Admin } = require("../models");
+const { Permission } = require("../models");
+const { Role } = require("../models");
 
-exports.protect = catchAsync(async (req, res, next) => {
+exports.adminAuth = catchAsync(async (req, res, next) => {
   let token;
 
   if (
@@ -27,17 +29,33 @@ exports.protect = catchAsync(async (req, res, next) => {
   );
 
   //3-check if user still exists
-  const currentUser = await User.findOne({ where: { id: decoded.id } });
-  if (!currentUser) {
+  const currentAdmin = await Admin.findOne({
+    where: { id: decoded.id },
+    include: [
+      {
+        model: Role,
+        as: "role",
+        include: [
+          {
+            model: Permission,
+            as: "permissions",
+            through: { attributes: [] }, // Exclude the RolePermission junction table fields
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!currentAdmin) {
     return next(
       new AppError(
-        "The user belonging to this token does no longer exist.",
+        "The admin belonging to this token does no longer exist.",
         401
       )
     );
   }
 
-  req.user = currentUser;
+  req.admin = currentAdmin;
 
   next();
 });

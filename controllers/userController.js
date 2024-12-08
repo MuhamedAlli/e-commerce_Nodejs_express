@@ -22,9 +22,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
-  let user = await User.findByPk(req.params.id, {
-    // attributes: { exclude: ["password"] },
-  });
+  let user = await User.findByPk(req.params.id);
   if (!user) {
     return next(
       new AppError(`User is not found with ${req.params.id} id`, 404)
@@ -41,7 +39,6 @@ exports.getPaginatedUsers = catchAsync(async (req, res, next) => {
   const { rows: users, count } = await User.findAndCountAll({
     limit,
     offset,
-    attributes: { exclude: ["password"] },
   });
 
   const pageCount = Math.ceil(count / limit);
@@ -69,3 +66,6 @@ exports.deleteUser = catchAsync(async (req, res, next) => {
 
   res.status(204).json({ status: "success" });
 });
+
+
+

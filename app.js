@@ -2,6 +2,7 @@ const express = require("express");
 const morgan = require("morgan");
 const globalErrorHandler = require("./middlewares/globalErrorHandler");
 const userRouter = require("./routes/userRoute");
+const adminRouter = require("./routes/adminRoute");
 const AppError = require("./utils/appError");
 const { sequelize } = require("./models");
 const app = express();
@@ -19,12 +20,10 @@ if (process.env.NODE_ENV === "development") {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  next();
-});
+//Routes
 
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/admins", adminRouter);
 
 //handle not founded routes middleware
 app.all("*", (req, res, next) => {

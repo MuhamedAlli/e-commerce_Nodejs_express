@@ -1,13 +1,10 @@
 "use strict";
-
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class Role extends Model {
     static associate(models) {
-      Role.hasMany(models.Admin, {
-        as: "admins",
-      });
+      Role.hasMany(models.Admin, { as: "admins", foreignKey: "roleId" });
 
       Role.belongsToMany(models.Permission, {
         through: models.RolePermission, // Join table

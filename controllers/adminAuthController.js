@@ -1,5 +1,4 @@
-const { userSignupValidate } = require("../validations/userValidation");
-const { User } = require("../models");
+const { Admin } = require("../models");
 const { RefreshToken } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const {
@@ -16,28 +15,28 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     return next(new AppError("Please provide email and password", 400));
   }
-  const user = await User.findOne({
+  const admin = await Admin.findOne({
     where: { email },
     include: [{ model: RefreshToken, as: "refreshTokens" }],
     attributes: { include: ["id", "name", "email", "password"] },
   });
 
-  if (!user || !(await correctPassword(password, user.password))) {
+  if (!admin || !(await correctPassword(password, admin.password))) {
     return next(new AppError("Incorrect email or password", 401));
   }
   let refreshToken;
   let refreshTokenExpiresIn;
-  const token = generateAccessToken(user.id);
+  const token = generateAccessToken(admin.id);
 
-  if (user.refreshTokens.some((token) => token.isActive)) {
-    const refreshTokenEntity = user.refreshTokens.find(
+  if (admin.refreshTokens.some((token) => token.isActive)) {
+    const refreshTokenEntity = admin.refreshTokens.find(
       (token) => token.isActive
     );
 
     refreshToken = refreshTokenEntity.token;
     refreshTokenExpiresIn = refreshTokenEntity.expiresAt;
   } else {
-    const newRefreshTokenEntity = await generateRefreshToken(user.id);
+    const newRefreshTokenEntity = await generateRefreshToken(admin.id);
     refreshToken = newRefreshTokenEntity.token;
     refreshTokenExpiresIn = newRefreshTokenEntity.expiresAt;
   }
@@ -49,42 +48,23 @@ exports.login = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     data: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      id: admin.id,
+      username: admin.username,
+      email: admin.email,
     },
     token,
     refreshTokenExpiresIn,
   });
 });
 
-exports.signupUser = catchAsync(async (req, res, next) => {
-  await userSignupValidate.validateAsync(req.body, {
-    abortEarly: false,
-  });
-
-  const newUser = await User.create(req.body);
-  const token = generateAccessToken(newUser.id);
-  const refreshTokenEntity = await generateRefreshToken(newUser.id);
-
-  setRefreshToken(res, refreshTokenEntity.token, refreshTokenEntity.expiresAt);
-  const { password, ...data } = newUser.toJSON();
-  res.status(201).json({
-    status: "success",
-    token,
-    data,
-    refreshTokenExpiresIn: refreshTokenEntity.expiresAt,
-  });
-});
-
-exports.userRefreshToken = catchAsync(async (req, res, next) => {
+exports.adminRefreshToken = catchAsync(async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken;
 
   if (!refreshToken) {
     return next(new AppError("Please provide refresh token", 400));
   }
 
-  const user = await User.findOne({
+  const admin = await Admin.findOne({
     where: {},
     include: {
       model: RefreshToken,
@@ -96,13 +76,11 @@ exports.userRefreshToken = catchAsync(async (req, res, next) => {
     },
   });
 
-  console.log(user);
-
-  if (!user) {
+  if (!admin) {
     return next(new AppError("Invalid token!", 404));
   }
 
-  const refreshTokenEntity = user.refreshTokens.find(
+  const refreshTokenEntity = admin.refreshTokens.find(
     (token) => token.token === refreshToken
   );
 
@@ -113,8 +91,8 @@ exports.userRefreshToken = catchAsync(async (req, res, next) => {
     revokedAt: new Date(),
   });
 
-  const newRefreshTokenEntity = await generateRefreshToken(user.id);
-  const token = generateAccessToken(user.id);
+  const newRefreshTokenEntity = await generateRefreshToken(admin.id);
+  const token = generateAccessToken(admin.id);
 
   setRefreshToken(
     res,
@@ -129,15 +107,14 @@ exports.userRefreshToken = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.userRevokeToken = catchAsync(async (req, res, next) => {
+exports.adminRevokeToken = catchAsync(async (req, res, next) => {
   const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
   if (!refreshToken) {
     return next(new AppError("Token is required!", 400));
   }
 
-  const user = await User.findOne({
-    // where: {},
+  const admin = await Admin.findOne({
     include: {
       model: RefreshToken,
       as: "refreshTokens",
@@ -148,11 +125,11 @@ exports.userRevokeToken = catchAsync(async (req, res, next) => {
     },
   });
 
-  if (!user) {
+  if (!admin) {
     return next(new AppError("Invalid token!", 404));
   }
 
-  const refreshTokenEntity = user.refreshTokens.find(
+  const refreshTokenEntity = admin.refreshTokens.find(
     (token) => token.token === refreshToken
   );
 

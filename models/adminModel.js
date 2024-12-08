@@ -1,14 +1,11 @@
 "use strict";
-
 const { Model } = require("sequelize");
+const { hashText } = require("../utils/bcrypt");
 
 module.exports = (sequelize, DataTypes) => {
   class Admin extends Model {
     static associate(models) {
-      Admin.hasOne(models.Role, {
-        foreignKey: "roleId",
-        as: "role",
-      });
+      Admin.belongsTo(models.Role, { as: "role", foreignKey: "roleId" });
 
       Admin.hasMany(models.RefreshToken, {
         as: "refreshTokens",
@@ -17,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Admin.init(
     {
-      username: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true,
