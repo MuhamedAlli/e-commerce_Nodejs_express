@@ -31,8 +31,7 @@ exports.updateAdmin = catchAsync(async (req, res, next) => {
   }
 
   let updateAdmin = await admin.update(req.body);
-  const { password, ...rest } = updateAdmin.toJSON();
-  res.status(200).json({ status: "success", data: rest });
+  res.status(200).json({ status: "success", data: updateAdmin });
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {

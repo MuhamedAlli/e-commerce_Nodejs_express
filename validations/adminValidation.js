@@ -19,4 +19,5 @@ exports.adminUpdateValidate = Joi.object({
   name: Joi.string().min(5).external(validateUniqueField(Admin, "name")),
   email: Joi.string().email().external(validateUniqueField(Admin, "email")),
   password: Joi.string().min(8),
-}).or("name", "email", "password");
+  roleId: Joi.number(),
+}).or("name", "email", "password", "roleId");
