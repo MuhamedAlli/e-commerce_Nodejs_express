@@ -8,8 +8,12 @@ exports.createRole = catchAsync(async (req, res, next) => {
   await roleCreateValidate.validateAsync(req.body, {
     abortEarly: false,
   });
-
   const newRole = await Role.create(req.body);
+
+  if (req.body.permissions) {
+    await newRole.addPermissions(req.body.permissions);
+  }
+
   res.status(201).json({
     status: "success",
     data: newRole,
@@ -30,6 +34,11 @@ exports.updateRole = catchAsync(async (req, res, next) => {
   }
 
   let updateRole = await role.update(req.body);
+
+  if (req.body.permissions) {
+    await role.setPermissions(req.body.permissions);
+  }
+
   res.status(200).json({ status: "success", data: updateRole });
 });
 

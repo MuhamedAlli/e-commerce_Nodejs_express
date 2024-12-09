@@ -36,7 +36,7 @@ exports.login = catchAsync(async (req, res, next) => {
     refreshToken = refreshTokenEntity.token;
     refreshTokenExpiresIn = refreshTokenEntity.expiresAt;
   } else {
-    const newRefreshTokenEntity = await generateRefreshToken(admin.id);
+    const newRefreshTokenEntity = await generateRefreshToken(null, admin.id);
     refreshToken = newRefreshTokenEntity.token;
     refreshTokenExpiresIn = newRefreshTokenEntity.expiresAt;
   }
@@ -49,7 +49,7 @@ exports.login = catchAsync(async (req, res, next) => {
     status: "success",
     data: {
       id: admin.id,
-      username: admin.username,
+      name: admin.name,
       email: admin.email,
     },
     token,
@@ -91,7 +91,7 @@ exports.adminRefreshToken = catchAsync(async (req, res, next) => {
     revokedAt: new Date(),
   });
 
-  const newRefreshTokenEntity = await generateRefreshToken(admin.id);
+  const newRefreshTokenEntity = await generateRefreshToken(null, admin.id);
   const token = generateAccessToken(admin.id);
 
   setRefreshToken(

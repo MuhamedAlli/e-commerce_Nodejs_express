@@ -37,7 +37,7 @@ exports.login = catchAsync(async (req, res, next) => {
     refreshToken = refreshTokenEntity.token;
     refreshTokenExpiresIn = refreshTokenEntity.expiresAt;
   } else {
-    const newRefreshTokenEntity = await generateRefreshToken(user.id);
+    const newRefreshTokenEntity = await generateRefreshToken(user.id, null);
     refreshToken = newRefreshTokenEntity.token;
     refreshTokenExpiresIn = newRefreshTokenEntity.expiresAt;
   }
@@ -65,7 +65,7 @@ exports.signupUser = catchAsync(async (req, res, next) => {
 
   const newUser = await User.create(req.body);
   const token = generateAccessToken(newUser.id);
-  const refreshTokenEntity = await generateRefreshToken(newUser.id);
+  const refreshTokenEntity = await generateRefreshToken(newUser.id, null);
 
   setRefreshToken(res, refreshTokenEntity.token, refreshTokenEntity.expiresAt);
   const { password, ...data } = newUser.toJSON();
@@ -113,7 +113,7 @@ exports.userRefreshToken = catchAsync(async (req, res, next) => {
     revokedAt: new Date(),
   });
 
-  const newRefreshTokenEntity = await generateRefreshToken(user.id);
+  const newRefreshTokenEntity = await generateRefreshToken(user.id, null);
   const token = generateAccessToken(user.id);
 
   setRefreshToken(

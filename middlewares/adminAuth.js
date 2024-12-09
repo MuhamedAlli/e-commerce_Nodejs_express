@@ -35,10 +35,12 @@ exports.adminAuth = catchAsync(async (req, res, next) => {
       {
         model: Role,
         as: "role",
+        attributes: ["id", "name"],
         include: [
           {
             model: Permission,
             as: "permissions",
+            attributes: ["name"],
             through: { attributes: [] }, // Exclude the RolePermission junction table fields
           },
         ],
@@ -55,7 +57,7 @@ exports.adminAuth = catchAsync(async (req, res, next) => {
     );
   }
 
-  req.admin = currentAdmin;
+  req.admin = currentAdmin.toJSON();
 
   next();
 });

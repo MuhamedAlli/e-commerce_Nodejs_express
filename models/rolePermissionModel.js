@@ -20,6 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "RolePermission",
       tableName: "role_permissions",
+      timestamps: false,
     }
   );
 

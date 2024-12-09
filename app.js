@@ -9,12 +9,19 @@ const AppError = require("./utils/appError");
 const { sequelize } = require("./models");
 const app = express();
 const cookieParser = require("cookie-parser");
+const { seedDatabase } = require("./seeders/intialSeed"); // Import the seed script
 
 process.on("uncaughtException", (err) => {
   console.log("UNCAUGHT EXCEPTION! Shitting down...");
   console.log(err.name, err.message);
   process.exit(1);
 });
+
+//this function seeds the permissions and superAdmin role and admin to manage our app
+// seedDatabase().then(() => {
+//   console.log("success");
+// });
+
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }

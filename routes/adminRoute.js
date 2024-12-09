@@ -13,13 +13,13 @@ router.route("/revokeToken").post(adminAuthController.adminRevokeToken);
 router.use(adminAuth);
 router
   .route("/")
-  .post(canAccess("delete-admin-create"), adminController.createAdmin)
-  .get(canAccess("delete-admin-view"), adminController.getPaginatedAdmins);
+  .post(canAccess("create-admin-permission"), adminController.createAdmin)
+  .get(canAccess("view-admin-permission"), adminController.getPaginatedAdmins);
 
 router
   .route("/:id")
-  .post(canAccess("delete-admin-update"), adminController.updateAdmin)
-  .get(canAccess("delete-admin-view"), adminController.getUser)
+  .patch(canAccess("update-admin-permission"), adminController.updateAdmin)
+  .get(canAccess("view-admin-permission"), adminController.getUser)
   .delete(canAccess("delete-admin-permission"), adminController.deleteAdmin);
 
 module.exports = router;

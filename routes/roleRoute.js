@@ -13,7 +13,7 @@ router
 
 router
   .route("/:id")
-  .post(canAccess("update-role-permission"), roleController.updateRole)
+  .patch(canAccess("update-role-permission"), roleController.updateRole)
   .get(canAccess("view-role-permission"), roleController.getRole)
   .delete(canAccess("delete-role-permission"), roleController.deleteRole);
 

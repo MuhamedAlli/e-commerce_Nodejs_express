@@ -12,14 +12,11 @@ router
     canAccess("create-permission-permission"),
     permissionController.createPermission
   )
-  .get(
-    canAccess("view-permission-permission"),
-    permissionController.getAllPermissions
-  );
+  .get(permissionController.getAllPermissions);
 
 router
   .route("/:id")
-  .post(
+  .patch(
     canAccess("update-permission-permission"),
     permissionController.updatePermission
   )

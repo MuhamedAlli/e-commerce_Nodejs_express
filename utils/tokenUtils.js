@@ -11,13 +11,15 @@ exports.generateAccessToken = (id) => {
   });
 };
 
-exports.generateRefreshToken = async (userId) => {
+exports.generateRefreshToken = async (userId = null, adminId = null) => {
   const refreshToken = crypto.randomBytes(32).toString("hex");
   const refreshTokenEntity = await RefreshToken.create({
     token: refreshToken,
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    adminId,
     userId,
   });
+
   return refreshTokenEntity;
 };
 
