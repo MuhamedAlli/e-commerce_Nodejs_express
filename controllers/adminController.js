@@ -3,6 +3,7 @@ const { adminUpdateValidate } = require("../validations/adminValidation");
 const { Admin } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const { correctPassword } = require("../utils/tokenUtils");
 
 exports.createAdmin = catchAsync(async (req, res, next) => {
   await adminCreateValidate.validateAsync(req.body, {
@@ -14,6 +15,28 @@ exports.createAdmin = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: "success",
     data,
+  });
+});
+
+exports.updateMyPassword = catchAsync(async (req, res, next) => {
+  //get the current user with his old password
+  const admin = await Admin.findOne({
+    where: { id: req.admin.id },
+    attributes: ["id", "password"],
+  });
+
+  //check if the old password is correct
+
+  if (!(await correctPassword(req.body.password, admin.password))) {
+    return next(new AppError("Your old password is incorrect", 401));
+  }
+
+  //update the password
+  admin.password = req.body.newPassword;
+  await admin.save();
+
+  res.status(200).json({
+    status: "success",
   });
 });
 

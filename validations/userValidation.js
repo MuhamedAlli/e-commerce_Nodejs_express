@@ -21,7 +21,15 @@ const userUpdateValidate = Joi.object({
   address: Joi.string(),
 }).or("name", "email", "phone", "password", "address");
 
+const userUpdateMeValidate = Joi.object({
+  name: Joi.string().min(5),
+  email: Joi.string().email().external(validateUniqueField(User, "email")),
+  phone: Joi.string().external(validateUniqueField(User, "phone")),
+  address: Joi.string(),
+}).or("name", "email", "phone", "password", "address");
+
 module.exports = {
   userSignupValidate,
   userUpdateValidate,
+  userUpdateMeValidate,
 };

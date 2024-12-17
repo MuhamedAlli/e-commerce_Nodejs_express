@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "nodemon server.js",
     "dev": "nodemon server.js"
   },
   "author": "Mohamed Ali",
@@ -14,12 +14,16 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.6",
     "express": "^4.21.1",
+    "helmet": "^8.0.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "mysql2": "^3.11.5",
+    "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
+    "rate-limit-redis": "^4.2.0",
     "sequelize": "^6.37.5",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "xss-clean": "^0.1.4"
   }
 }

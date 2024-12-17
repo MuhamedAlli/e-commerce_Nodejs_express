@@ -1,14 +1,15 @@
-const { userSignupValidate } = require("../validations/userValidation");
 const { User } = require("../models");
 const { RefreshToken } = require("../models");
 const catchAsync = require("../utils/catchAsync");
+const { correctPassword } = require("../utils/tokenUtils");
+const AppError = require("../utils/appError");
+const setRefreshToken = require("../utils/setRefreshTokenInCookie");
+
+const { userSignupValidate } = require("../validations/userValidation");
 const {
   generateAccessToken,
   generateRefreshToken,
 } = require("../utils/tokenUtils");
-const { correctPassword } = require("../utils/tokenUtils");
-const AppError = require("../utils/appError");
-const setRefreshToken = require("../utils/setRefreshTokenInCookie");
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;

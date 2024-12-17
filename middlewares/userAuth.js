@@ -37,7 +37,7 @@ exports.userAuth = catchAsync(async (req, res, next) => {
     );
   }
 
-  req.user = currentUser;
+  req.user = currentUser.toJSON();
 
   next();
 });

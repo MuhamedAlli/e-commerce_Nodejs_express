@@ -11,6 +11,8 @@ router.route("/revokeToken").post(adminAuthController.adminRevokeToken);
 
 //adminAuth middleware just applied on the routes below
 router.use(adminAuth);
+router.route("/updateMyPassword").patch(adminController.updateMyPassword);
+
 router
   .route("/")
   .post(canAccess("create-admin-permission"), adminController.createAdmin)
