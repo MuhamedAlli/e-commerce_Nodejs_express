@@ -3,16 +3,19 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const { ProductImage } = require("../models");
 const multer = require("multer");
+const sharp = require("sharp");
 
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/iamges/products");
-  },
-  filename: (req, file, cb) => {
-    const ext = file.mimetype.split("/")[1];
-    cb(null, `product-${Date.now()}.${ext}`);
-  },
-});
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/images/products");
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split("/")[1];
+//     cb(null, `product-${Date.now()}.${ext}`);
+//   },
+// });
+
+const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -22,12 +25,73 @@ const multerFilter = (req, file, cb) => {
   }
 };
 
-const upload = multer({ dest: "public/iamges/products" });
+const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
-exports.uploadProductImage = upload.single("thumbnail");
+// exports.uploadProductImage = upload.single("thumbnail");
+// exports.uploadProductImages = upload.array("images", 5);
+
+exports.uploadProductImage = upload.fields([
+  { name: "thumbnail", maxCount: 1 },
+  { name: "images", maxCount: 5 },
+]);
+
+// exports.resizeProductImage = catchAsync(async (req, res, next) => {
+//   if (!req.file) return next();
+
+//   req.file.filename = `product-${Date.now()}.jpeg`;
+
+//   await sharp(req.file.buffer)
+//     .resize(300, 300)
+//     .toFormat("jpeg")
+//     .jpeg({ quality: 90 })
+//     .toFile(`public/images/products/thumbnails/${req.file.filename}`);
+
+//   next();
+// });
+
+exports.resizeProductImage = catchAsync(async (req, res, next) => {
+  console.log(req.body);
+
+  if (!req.files.thumbnail || !req.files.images) return next();
+
+  // 1) Thumbnail
+  req.body.thumbnail = `product-${Date.now()}-thumbnail.jpeg`;
+  await sharp(req.files.thumbnail[0].buffer)
+    .resize(300, 300)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`public/images/products/thumbnails/${req.body.thumbnail}`);
+
+  // 2) Images
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (file, i) => {
+      const filename = `product-${Date.now()}-${i + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(800, 800)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`public/images/products/${filename}`);
+
+      req.body.images.push(filename);
+    })
+  );
+  next();
+});
 
 exports.createProduct = catchAsync(async (req, res, next) => {
+  req.body = { ...req.body };
   const newProduct = await Product.create(req.body);
+
+  if (req.body.images) {
+    const productImages = req.body.images.map((image) => ({
+      productId: newProduct.id,
+      url: image,
+    }));
+    await ProductImage.bulkCreate(productImages);
+  }
+
   res.status(201).json({
     status: "success",
     data: newProduct,

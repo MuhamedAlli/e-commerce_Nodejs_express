@@ -8,6 +8,8 @@ router.use(adminAuth);
 router.post(
   "/",
   canAccess("create-product-permission"),
+  productController.uploadProductImage,
+  productController.resizeProductImage,
   productController.createProduct
 );
 router.get(
@@ -27,7 +29,8 @@ router.get(
   productController.getProduct
 );
 router.delete(
-  canAccess("/:id", "delete-product-permission"),
+  "/:id",
+  canAccess("delete-product-permission"),
   productController.deleteProduct
 );
 

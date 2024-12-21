@@ -4,6 +4,7 @@ const catchAsync = require("../utils/catchAsync");
 const { categoryCreateValidate } = require("../validations/categoryValidation");
 
 exports.createCategory = catchAsync(async (req, res, next) => {
+  console.log(req.body);
   await categoryCreateValidate.validateAsync(req.body, {
     abortEarly: false,
   });
