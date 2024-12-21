@@ -23,7 +23,14 @@ async function seedDatabase() {
     });
 
     // Define tables and permissions
-    const tables = ["admin", "role", "permission", "user"];
+    const tables = [
+      "admin",
+      "role",
+      "permission",
+      "user",
+      "category",
+      "product",
+    ];
     const permissions = ["create", "update", "view", "delete"];
 
     // Generate permission entries

@@ -6,6 +6,7 @@ const userRouter = require("./routes/userRoute");
 const adminRouter = require("./routes/adminRoute");
 const roleRouter = require("./routes/roleRoute");
 const permissionRouter = require("./routes/PermissionRoute");
+const categoryRouter = require("./routes/categoryRoute");
 const AppError = require("./utils/appError");
 const { sequelize } = require("./models");
 const app = express();
@@ -41,6 +42,7 @@ app.use("/api", limiter);
 
 app.use(express.json({ limit: "10kb" }));
 app.use(cookieParser());
+app.use(express.static(`${__dirname}/public`));
 
 //Routes
 
@@ -48,7 +50,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/admins", adminRouter);
 app.use("/api/v1/roles", roleRouter);
 app.use("/api/v1/permissions", permissionRouter);
-
+app.use("/api/v1/categories", categoryRouter);
 //handle not founded routes middleware
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't finde ${req.originalUrl} on this server.`, 404));
